@@ -17,6 +17,9 @@
 ;==========================================================
 
 include-file = $HOME/.config/polybar/colors
+include-file = $HOME/.config/polybar/battery
+include-file = $HOME/.config/polybar/menu
+; include-file = $HOME/.config/polybar/i3.ini
 ; include-file = $HOME/.config/polybar/modules
 
 [bar/main_top]
@@ -26,26 +29,33 @@ height = 24pt
 
 ; dpi = 96
 
-background = ${colors.background}
+background = ${colors.primary}
 foreground = ${colors.foreground}
 
 line-size = 2pt
 
-border-size = 1pt
-border-color = #FFFFFFFF
+; border-size = 1pt
+; border-color = #FFFFFFFF
 
 padding-left = 0
-padding-right = 1
+padding-right = 0
 
-module-margin = 1
+module-margin = 0
 
 ; separator = |
 separator-foreground = ${colors.disabled}
 
-font-0 = monospace;2
+; font-0 = "Inconsolata:style=Bold;1"
+font-0 = "Fira Code Nerd Font Mono:style=Bold;3"
+font-1 = "Noto Sans CJK SC:style=Bold;2"
+font-2 = "Fira Code Nerd Font Mono:style=Bold:size=25;5"
+font-3 = "Fira Code Nerd Font Mono:style=Bold:size=16;3"
 
-modules-left = xworkspaces xwindow
-modules-right = filesystem pulseaudio xkeyboard memory cpu wlan eth date
+
+modules-left = i3 xwindow
+; modules-left = xworkspaces xwindow
+modules-right = cpu memory filesystem battery pulseaudio date menu
+; modules-right = filesystem pulseaudio xkeyboard cpu memory wlan eth date
 
 cursor-click = pointer
 cursor-scroll = ns-resize
@@ -60,56 +70,99 @@ enable-ipc = true
 
 ; override-redirect = true
 
-[module/xworkspaces]
-type = internal/xworkspaces
+; [module/xworkspaces]
+; type = internal/xworkspaces
 
-label-active = %name%
-label-active-background = ${colors.background-alt}
-label-active-underline= ${colors.primary}
-label-active-padding = 1
+; label-active = %name%
+; label-active-background = ${colors.background-alt}
+; label-active-underline= ${colors.primary}
+; label-active-padding = 1
 
-label-occupied = %name%
-label-occupied-padding = 1
+; label-occupied = %name%
+; label-occupied-padding = 1
 
-label-urgent = %name%
-label-urgent-background = ${colors.alert}
-label-urgent-padding = 1
+; label-urgent = %name%
+; label-urgent-background = ${colors.alert}
+; label-urgent-padding = 1
 
 label-empty = %name%
-label-empty-foreground = ${colors.disabled}
+label-empty-foreground = ${colors.disable}
 label-empty-padding = 1
 
-
 [module/xwindow]
-format-margin = 0
 type = internal/xwindow
-label = %title:0:20%
-; format = <label>
-format-background = #FFFFFFFF
-;format-padding = 2
+; Available tags:
+;   <label> (default)
+format = <label>
+format-background = ${colors.primary}
+format-foreground = ${colors.background}
+format-padding = 1
+
+; Available tokens:
+;   %title%
+; Default: %title%
+label = %title:0:50%
+label-maxlen = 50
+
+; Used instead of label when there is no window title
+; Available tokens:
+;   None
+; label-empty = Empty
+; label-empty-foreground = #707880
 
 [module/filesystem]
 type = internal/fs
 interval = 25
 
 mount-0 = /
-
-label-mounted = %{F#F0C674}%mountpoint%%{F-} %percentage_used%%
-
-label-unmounted = %mountpoint% not mounted
-label-unmounted-foreground = ${colors.disabled}
+; MOUNTED
+label-mounted = %percentage_used%%
+label-mounted-padding-left = 1
+format-mounted = <label-mounted>
+format-mounted-prefix = "/"
+format-mounted-suffix = "]"
+format-mounted-background = ${colors.background}
+format-mounted-prefix-foreground = ${colors.primary}
+format-mounted-suffix-foreground = ${colors.primary}
+format-mounted-padding = 1
+; UNMOUNTED
+label-unmounted = %mountpoint%
+format-unmounted = <label-unmounted> is not mounted
+format-unmounted-suffix = "]"
+format-unmounted-background = ${colors.background}
+format-unmounted-foreground = ${colors.alert}
+format-unmounted-suffix-foreground = ${colors.primary}
+format-unmounted-padding = 1
 
 [module/pulseaudio]
 type = internal/pulseaudio
 
-format-volume-prefix = "VOL "
-format-volume-prefix-foreground = ${colors.primary}
-format-volume = <label-volume>
-
 label-volume = %percentage%%
 
-label-muted = muted
-label-muted-foreground = ${colors.disabled}
+format-volume = <label-volume>
+format-volume-prefix = "[VOL "
+format-volume-suffix = "]"
+
+format-volume-background = ${colors.background}
+format-volume-prefix-foreground = ${colors.primary}
+format-volume-suffix-foreground = ${colors.primary}
+
+format-volume-prefix-padding-left = 1
+
+
+label-muted = %{T3}ﱝ%{T-}
+;label-muted = "muted"
+
+format-muted = <label-muted>
+format-muted-prefix = "["
+format-muted-suffix = "]"
+
+format-muted-background = ${colors.background}
+format-muted-prefix-foreground = ${colors.primary}
+format-muted-foreground = ${colors.disabled}
+format-muted-suffix-foreground = ${colors.primary}
+
+format-muted-prefix-padding-left = 1
 
 [module/xkeyboard]
 type = internal/xkeyboard
@@ -123,19 +176,31 @@ label-indicator-margin = 1
 label-indicator-foreground = ${colors.background}
 label-indicator-background = ${colors.secondary}
 
-[module/memory]
-type = internal/memory
-interval = 2
-format-prefix = "RAM "
-format-prefix-foreground = ${colors.primary}
-label = %percentage_used:2%%
-
 [module/cpu]
 type = internal/cpu
 interval = 2
-format-prefix = "CPU "
+; format-prefix = "[%{T3}%{T-}"
+format-prefix = "[CPU"
 format-prefix-foreground = ${colors.primary}
-label = %percentage:2%%
+; format-suffix = "]"
+format-suffix-foreground = ${colors.primary}
+label = %percentage:3%%
+format-background = ${colors.background}
+
+format-prefix-padding-left= 1
+
+[module/memory]
+type = internal/memory
+interval = 2
+; format-prefix = "[RAM"
+format-prefix = " RAM"
+format-prefix-foreground = ${colors.primary}
+; format-suffix = "]"
+; ormat-suffix-foreground = ${colors.primary}
+label = %percentage_used:3%%
+format-background = ${colors.background}
+
+format-suffix-padding-right = 1
 
 [network-base]
 type = internal/network
@@ -158,11 +223,81 @@ label-connected = %{F#F0C674}%ifname%%{F-} %local_ip%
 type = internal/date
 interval = 1
 
-date = %H:%M
+date = %H:%M:%S
 date-alt = %Y-%m-%d %H:%M:%S
+label-date = %date%
 
-label = %date%
-label-foreground = ${colors.primary}
+format-date = <label-date>
+format-prefix = "["
+format-suffix = "]"
+
+format-prefix-foreground = ${colors.primary}
+format-suffix-foreground = ${colors.primary}
+format-background = ${colors.background}
+
+format-padding= 1
+
+[module/i3]
+type = internal/i3
+
+; pin-workspaces = true
+; show-urgent = true
+
+; strip-wsnumbers = true
+
+index-sort = false
+
+enable-click = false
+enable-scroll = false
+wrapping-scroll = false
+reverse-scroll = false
+
+fuzzy-match = false
+
+ws-icon-0 = 1;一
+ws-icon-1 = 2;二
+ws-icon-2 = 3;三
+ws-icon-3 = 4;四
+ws-icon-4 = 5;五
+ws-icon-5 = 6;六
+ws-icon-6 = 7;七
+ws-icon-7 = 8;八
+ws-icon-8 = 9;九
+ws-icon-9 = 10;十
+
+format = <label-state> <label-mode>
+
+; label-mode = %mode%
+label-mode-padding = 0
+; label-mode-background = #e60053
+
+; focused = Active workspace on focused monitor
+label-focused = %icon%
+label-focused-foreground = ${colors.background}
+label-focused-background = ${colors.primary}
+; label-focused-underline= ${colors.secondary}
+label-focused-padding = 1
+
+; unfocused = Inactive workspace on any monitor
+label-unfocused = %icon%
+label-unfocused-padding = 1
+label-unfocused-background = ${colors.background}
+
+; visible = Active workspace on unfocused monitor
+label-visible = %icon%
+label-visible-background = ${self.label-focused-background}
+; label-visible-underline = ${self.label-focused-underline}
+label-visible-padding = ${self.label-focused-padding}
+
+; urgent = Workspace with urgency hint set
+label-urgent = %icon%
+label-urgent-background = ${colors.alert}
+label-urgent-padding = 2
+
+; label-separator = " "
+; label-separator-padding = 0
+; label-separator-foreground = #ffb52a
+; label-separator-background = ${colors.background}
 
 [settings]
 screenchange-reload = true
